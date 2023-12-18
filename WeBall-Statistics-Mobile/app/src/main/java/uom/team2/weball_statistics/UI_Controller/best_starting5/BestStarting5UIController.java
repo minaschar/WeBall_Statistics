@@ -23,7 +23,7 @@ import uom.team2.weball_statistics.utils.Utils;
 
 
 /*
- * @author Dionisis Lougaris ics20058
+ * @author Charakopoulos Minas Theodoros mai24054
  */
 public class BestStarting5UIController {
 
@@ -37,286 +37,68 @@ public class BestStarting5UIController {
         return instance;
     }
 
-    public void fillBestPointGuardInfo(Player player, BestStarting5 bestStarting5Fragment) throws IOException, JSONException {
-        BestPlayerPerPositionLayoutBinding bestPlayerPerPositionLayoutBinding = bestStarting5Fragment.getBinding().includePG;
+    public void fillBestPlayerInfo(Player player, BestStarting5 bestStarting5Fragment, PositionBinder position)
+            throws IOException, JSONException {
+        BestPlayerPerPositionLayoutBinding bestPlayerPerPositionLayoutBinding = position.getBinding(bestStarting5Fragment);
 
-        if(player.getTeamString().equals("Atlanta Hawks")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Hawks));
-        }else if(player.getTeamString().equals("Brooklyn Nets")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Nets));
-        }else if(player.getTeamString().equals("Boston Celtics")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Celtics));
-        }else if(player.getTeamString().equals("Cleveland Cavaliers")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Cavaliers));
-        }else if(player.getTeamString().equals("Dallas Mavericks")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Mavericks));
-        }else if(player.getTeamString().equals("Charlotte Hornets")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Hornets));
-        }else if(player.getTeamString().equals("Chicago Bulls")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Bulls));
-        }else if(player.getTeamString().equals("Denver Nuggets")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Nuggets));
-        }else{
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.other));
+        if (bestPlayerPerPositionLayoutBinding != null) {
+            setPlayerInfo(player, bestStarting5Fragment, bestPlayerPerPositionLayoutBinding, position.getClass().getSimpleName());
         }
-        ImageView imageViewTeamLogo = (ImageView) bestPlayerPerPositionLayoutBinding.logoImage;
-        ImageView imageViewPlayerPhoto = (ImageView) bestPlayerPerPositionLayoutBinding.playerImage;
-        TextView textViewPlayerInfo = (TextView) bestPlayerPerPositionLayoutBinding.cityTeamNumberPosition;
-        TextView textViewPlayerName = (TextView) bestPlayerPerPositionLayoutBinding.firstnameLastname;
-        TextView textViewEfValue = (TextView) bestPlayerPerPositionLayoutBinding.efficiencyValue;
+    }
 
+    private void setPlayerInfo(Player player, BestStarting5 bestStarting5Fragment,
+                               BestPlayerPerPositionLayoutBinding binding, String position)
+            throws IOException, JSONException {
 
-        textViewPlayerInfo.setText(player.getTeamString()+" | #"+player.getNumber()+" | PG");
-        textViewPlayerName.setText(player.getName()+" "+player.getSurname());
-        textViewEfValue.setText("+ "+player.getEfficiency());
-        if(!"NOT FOUND".equals(player.getSurname())) {
+        binding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), getColorByTeam(player.getTeamString())));
+
+        ImageView imageViewTeamLogo = binding.logoImage;
+        ImageView imageViewPlayerPhoto = binding.playerImage;
+        TextView textViewPlayerInfo = binding.cityTeamNumberPosition;
+        TextView textViewPlayerName = binding.firstnameLastname;
+        TextView textViewEfValue = binding.efficiencyValue;
+
+        textViewPlayerInfo.setText(player.getTeamString() + " | #" + player.getNumber() + " | " + position);
+        textViewPlayerName.setText(player.getName() + " " + player.getSurname());
+        textViewEfValue.setText("+ " + player.getEfficiency());
+
+        if (!"NOT FOUND".equals(player.getSurname())) {
+            loadPlayerImage(player, imageViewPlayerPhoto);
+            loadTeamLogo(player, imageViewTeamLogo);
+        }
+    }
+
+    private void loadPlayerImage(Player player, ImageView imageViewPlayerPhoto) {
         Picasso.get()
-                .load(Config.PLAYER_IMAGES_RESOURCES+player.getImagePath())
+                .load(Config.PLAYER_IMAGES_RESOURCES + player.getImagePath())
                 .resize(250, 400)
                 .centerCrop()
                 .into(imageViewPlayerPhoto);
-        //Getting team logo if player exists
-            OkHttpClient client = new OkHttpClient().newBuilder()
-                    .build();
-            MediaType mediaType = MediaType.parse("application/json");
-            Request request = new Request.Builder()
-                    .url(Config.API_URL + "team.php?name=" + player.getTeamString())
-                    .method("GET", null)
-                    .addHeader("Content-Type", "application/json")
-                    .build();
-            Response response = client.newCall(request).execute();
-            Team myTeam = JSONHandler.deserializeTeam(response.body().string());
-
-            Picasso.get()
-                    .load(Config.TEAM_IMAGES_RESOURCES + myTeam.getBadgePath())
-                    .resize(250, 400)
-                    .centerCrop()
-                    .into(imageViewTeamLogo);
-        }
     }
-    public void fillBestShootingGuardInfo(Player player, BestStarting5 bestStarting5Fragment) throws IOException, JSONException {
-        BestPlayerPerPositionLayoutBinding bestPlayerPerPositionLayoutBinding = bestStarting5Fragment.getBinding().includeSG;
 
-        if(player.getTeamString().equals("Atlanta Hawks")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Hawks));
-        }else if(player.getTeamString().equals("Brooklyn Nets")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Nets));
-        }else if(player.getTeamString().equals("Boston Celtics")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Celtics));
-        }else if(player.getTeamString().equals("Cleveland Cavaliers")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Cavaliers));
-        }else if(player.getTeamString().equals("Dallas Mavericks")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Mavericks));
-        }else if(player.getTeamString().equals("Charlotte Hornets")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Hornets));
-        }else if(player.getTeamString().equals("Chicago Bulls")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Bulls));
-        }else if(player.getTeamString().equals("Denver Nuggets")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Nuggets));
-        }else{
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.other));
-        }
-        ImageView imageViewTeamLogo = (ImageView) bestPlayerPerPositionLayoutBinding.logoImage;
-        ImageView imageViewPlayerPhoto = (ImageView) bestPlayerPerPositionLayoutBinding.playerImage;
-        TextView textViewPlayerInfo = (TextView) bestPlayerPerPositionLayoutBinding.cityTeamNumberPosition;
-        TextView textViewPlayerName = (TextView) bestPlayerPerPositionLayoutBinding.firstnameLastname;
-        TextView textViewEfValue = (TextView) bestPlayerPerPositionLayoutBinding.efficiencyValue;
+    private void loadTeamLogo(Player player, ImageView imageViewTeamLogo) throws IOException, JSONException {
+        OkHttpClient client = new OkHttpClient().newBuilder().build();
+        Request request = new Request.Builder()
+                .url(Config.API_URL + "team.php?name=" + player.getTeamString())
+                .method("GET", null)
+                .addHeader("Content-Type", "application/json")
+                .build();
+        Response response = client.newCall(request).execute();
+        Team myTeam = JSONHandler.deserializeTeam(response.body().string());
 
-        textViewPlayerInfo.setText(player.getTeamString()+" | #"+player.getNumber()+" | SG");
-        textViewPlayerName.setText(player.getName()+" "+player.getSurname());
-        textViewEfValue.setText("+ "+player.getEfficiency());
-        //Getting team logo if player exists
-        if(!"NOT FOUND".equals(player.getSurname())) {
-            Picasso.get()
-                    .load(Config.PLAYER_IMAGES_RESOURCES + player.getImagePath())
-                    .resize(250, 400)
-                    .centerCrop()
-                    .into(imageViewPlayerPhoto);
-            //Getting team logo
-            OkHttpClient client = new OkHttpClient().newBuilder()
-                    .build();
-            MediaType mediaType = MediaType.parse("application/json");
-            Request request = new Request.Builder()
-                    .url(Config.API_URL + "team.php?name=" + player.getTeamString())
-                    .method("GET", null)
-                    .addHeader("Content-Type", "application/json")
-                    .build();
-            Response response = client.newCall(request).execute();
-            Team myTeam = JSONHandler.deserializeTeam(response.body().string());
-            Picasso.get()
-                    .load(Config.TEAM_IMAGES_RESOURCES + myTeam.getBadgePath())
-                    .resize(250, 400)
-                    .centerCrop()
-                    .into(imageViewTeamLogo);
-        }
-
+        Picasso.get()
+                .load(Config.TEAM_IMAGES_RESOURCES + myTeam.getBadgePath())
+                .resize(250, 400)
+                .centerCrop()
+                .into(imageViewTeamLogo);
     }
-    public void fillBestSmallForwardInfo(Player player, BestStarting5 bestStarting5Fragment) throws IOException, JSONException {
-        BestPlayerPerPositionLayoutBinding bestPlayerPerPositionLayoutBinding = bestStarting5Fragment.getBinding().includeSF;
 
-        if(player.getTeamString().equals("Atlanta Hawks")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Hawks));
-        }else if(player.getTeamString().equals("Brooklyn Nets")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Nets));
-        }else if(player.getTeamString().equals("Boston Celtics")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Celtics));
-        }else if(player.getTeamString().equals("Cleveland Cavaliers")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Cavaliers));
-        }else if(player.getTeamString().equals("Dallas Mavericks")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Mavericks));
-        }else if(player.getTeamString().equals("Charlotte Hornets")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Hornets));
-        }else if(player.getTeamString().equals("Chicago Bulls")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Bulls));
-        }else if(player.getTeamString().equals("Denver Nuggets")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Nuggets));
-        }else{
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.other));
-        }
-        ImageView imageViewTeamLogo = (ImageView) bestPlayerPerPositionLayoutBinding.logoImage;
-        ImageView imageViewPlayerPhoto = (ImageView) bestPlayerPerPositionLayoutBinding.playerImage;
-        TextView textViewPlayerInfo = (TextView) bestPlayerPerPositionLayoutBinding.cityTeamNumberPosition;
-        TextView textViewPlayerName = (TextView) bestPlayerPerPositionLayoutBinding.firstnameLastname;
-        TextView textViewEfValue = (TextView) bestPlayerPerPositionLayoutBinding.efficiencyValue;
-
-        textViewPlayerInfo.setText(player.getTeamString()+" | #"+player.getNumber()+" | SF");
-        textViewPlayerName.setText(player.getName()+" "+player.getSurname());
-        textViewEfValue.setText("+ "+player.getEfficiency());
-        //Getting team logo if player exists
-        if(!"NOT FOUND".equals(player.getSurname())) {
-            Picasso.get()
-                    .load(Config.PLAYER_IMAGES_RESOURCES + player.getImagePath())
-                    .resize(250, 400)
-                    .centerCrop()
-                    .into(imageViewPlayerPhoto);
-            //Getting team logo
-            OkHttpClient client = new OkHttpClient().newBuilder()
-                    .build();
-            MediaType mediaType = MediaType.parse("application/json");
-            Request request = new Request.Builder()
-                    .url(Config.API_URL + "team.php?name=" + player.getTeamString())
-                    .method("GET", null)
-                    .addHeader("Content-Type", "application/json")
-                    .build();
-            Response response = client.newCall(request).execute();
-            Team myTeam = JSONHandler.deserializeTeam(response.body().string());
-            Picasso.get()
-                    .load(Config.TEAM_IMAGES_RESOURCES + myTeam.getBadgePath())
-                    .resize(250, 400)
-                    .centerCrop()
-                    .into(imageViewTeamLogo);
-        }
-    }
-    public void fillBestPowerForwardInfo(Player player, BestStarting5 bestStarting5Fragment) throws IOException, JSONException {
-        BestPlayerPerPositionLayoutBinding bestPlayerPerPositionLayoutBinding = bestStarting5Fragment.getBinding().includePF;
-
-        if(player.getTeamString().equals("Atlanta Hawks")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Hawks));
-        }else if(player.getTeamString().equals("Brooklyn Nets")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Nets));
-        }else if(player.getTeamString().equals("Boston Celtics")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Celtics));
-        }else if(player.getTeamString().equals("Cleveland Cavaliers")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Cavaliers));
-        }else if(player.getTeamString().equals("Dallas Mavericks")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Mavericks));
-        }else if(player.getTeamString().equals("Charlotte Hornets")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Hornets));
-        }else if(player.getTeamString().equals("Chicago Bulls")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Bulls));
-        }else if(player.getTeamString().equals("Denver Nuggets")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Nuggets));
-        }else{
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.other));
-        }
-        ImageView imageViewTeamLogo = (ImageView) bestPlayerPerPositionLayoutBinding.logoImage;
-        ImageView imageViewPlayerPhoto = (ImageView) bestPlayerPerPositionLayoutBinding.playerImage;
-        TextView textViewPlayerInfo = (TextView) bestPlayerPerPositionLayoutBinding.cityTeamNumberPosition;
-        TextView textViewPlayerName = (TextView) bestPlayerPerPositionLayoutBinding.firstnameLastname;
-        TextView textViewEfValue = (TextView) bestPlayerPerPositionLayoutBinding.efficiencyValue;
-
-        textViewPlayerInfo.setText(player.getTeamString()+" | #"+player.getNumber()+" | PF");
-        textViewPlayerName.setText(player.getName()+" "+player.getSurname());
-        textViewEfValue.setText("+ "+player.getEfficiency());
-        //Getting team logo if player exists
-        if(!"NOT FOUND".equals(player.getSurname())) {
-            Picasso.get()
-                    .load(Config.PLAYER_IMAGES_RESOURCES + player.getImagePath())
-                    .resize(250, 400)
-                    .centerCrop()
-                    .into(imageViewPlayerPhoto);
-            //Getting team logo
-            OkHttpClient client = new OkHttpClient().newBuilder()
-                    .build();
-            MediaType mediaType = MediaType.parse("application/json");
-            Request request = new Request.Builder()
-                    .url(Config.API_URL + "team.php?name=" + player.getTeamString())
-                    .method("GET", null)
-                    .addHeader("Content-Type", "application/json")
-                    .build();
-            Response response = client.newCall(request).execute();
-            Team myTeam = JSONHandler.deserializeTeam(response.body().string());
-            Picasso.get()
-                    .load(Config.TEAM_IMAGES_RESOURCES + myTeam.getBadgePath())
-                    .resize(250, 400)
-                    .centerCrop()
-                    .into(imageViewTeamLogo);
-        }
-    }
-    public void fillBestCenterInfo(Player player, BestStarting5 bestStarting5Fragment) throws IOException, JSONException {
-        BestPlayerPerPositionLayoutBinding bestPlayerPerPositionLayoutBinding = bestStarting5Fragment.getBinding().includeC;
-
-        if(player.getTeamString().equals("Atlanta Hawks")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Hawks));
-        }else if(player.getTeamString().equals("Brooklyn Nets")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Nets));
-        }else if(player.getTeamString().equals("Boston Celtics")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Celtics));
-        }else if(player.getTeamString().equals("Cleveland Cavaliers")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Cavaliers));
-        }else if(player.getTeamString().equals("Dallas Mavericks")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Mavericks));
-        }else if(player.getTeamString().equals("Charlotte Hornets")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Hornets));
-        }else if(player.getTeamString().equals("Chicago Bulls")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Bulls));
-        }else if(player.getTeamString().equals("Denver Nuggets")){
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.Nuggets));
-        }else{
-            bestPlayerPerPositionLayoutBinding.background.setBackgroundColor(Utils.getColor(bestStarting5Fragment.getContext(), R.color.other));
-        }
-        ImageView imageViewTeamLogo = (ImageView) bestPlayerPerPositionLayoutBinding.logoImage;
-        ImageView imageViewPlayerPhoto = (ImageView) bestPlayerPerPositionLayoutBinding.playerImage;
-        TextView textViewPlayerInfo = (TextView) bestPlayerPerPositionLayoutBinding.cityTeamNumberPosition;
-        TextView textViewPlayerName = (TextView) bestPlayerPerPositionLayoutBinding.firstnameLastname;
-        TextView textViewEfValue = (TextView) bestPlayerPerPositionLayoutBinding.efficiencyValue;
-
-        textViewPlayerInfo.setText(player.getTeamString()+" | #"+player.getNumber()+" | C");
-        textViewPlayerName.setText(player.getName()+" "+player.getSurname());
-        textViewEfValue.setText("+ "+player.getEfficiency());
-        //Getting team logo if player exists
-        if(!"NOT FOUND".equals(player.getSurname())) {
-            Picasso.get()
-                    .load(Config.PLAYER_IMAGES_RESOURCES + player.getImagePath())
-                    .resize(250, 400)
-                    .centerCrop()
-                    .into(imageViewPlayerPhoto);
-            //Getting team logo
-            OkHttpClient client = new OkHttpClient().newBuilder()
-                    .build();
-            MediaType mediaType = MediaType.parse("application/json");
-            Request request = new Request.Builder()
-                    .url(Config.API_URL + "team.php?name=" + player.getTeamString())
-                    .method("GET", null)
-                    .addHeader("Content-Type", "application/json")
-                    .build();
-            Response response = client.newCall(request).execute();
-            Team myTeam = JSONHandler.deserializeTeam(response.body().string());
-            Picasso.get()
-                    .load(Config.TEAM_IMAGES_RESOURCES + myTeam.getBadgePath())
-                    .resize(250, 400)
-                    .centerCrop()
-                    .into(imageViewTeamLogo);
+    private int getColorByTeam(String team) {
+        try {
+            TeamColor teamColor = TeamColor.valueOf(team.toUpperCase().replace(" ", "_"));
+            return teamColor.getColorResourceId();
+        } catch (IllegalArgumentException e) {
+            return TeamColor.DEFAULT_COLOR.getColorResourceId();
         }
     }
 }

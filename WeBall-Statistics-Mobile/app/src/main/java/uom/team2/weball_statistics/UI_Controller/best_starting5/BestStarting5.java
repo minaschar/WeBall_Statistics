@@ -39,11 +39,11 @@ public class BestStarting5 extends Fragment {
         binding = FragmentBestStarting5Binding.inflate(inflater, container, false);
         try {
             BestStarting5Model bs5 = new BestStarting5Model();
-            this.bestStarting5UIController.fillBestPointGuardInfo(bs5.getBestPG(), this);
-            this.bestStarting5UIController.fillBestShootingGuardInfo(bs5.getBestSG(), this);
-            this.bestStarting5UIController.fillBestSmallForwardInfo(bs5.getBestSF(), this);
-            this.bestStarting5UIController.fillBestPowerForwardInfo(bs5.getBestPF(), this);
-            this.bestStarting5UIController.fillBestCenterInfo(bs5.getBestC(), this);
+            this.bestStarting5UIController.fillBestPlayerInfo(bs5.getBestPG(), this, new PointGuardBinder());
+            this.bestStarting5UIController.fillBestPlayerInfo(bs5.getBestSG(), this, new ShootingGuardBinder());
+            this.bestStarting5UIController.fillBestPlayerInfo(bs5.getBestSF(), this, new SmallForwardBinder());
+            this.bestStarting5UIController.fillBestPlayerInfo(bs5.getBestPF(), this,  new PowerForwardBinder());
+            this.bestStarting5UIController.fillBestPlayerInfo(bs5.getBestC(), this, new CenterBinder());
 
         } catch (JSONException e) {
             e.printStackTrace();
