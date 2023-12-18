@@ -126,7 +126,6 @@ public class CompletedMatchStatsUIController {
         awayTeamPlayers = JSONHandler.deserializeListOfPlayers2(response2.body().string());
     }
 
-    //Does this work?
     public void getPlayerLiveStatsForBoth(Match myMatch) throws IOException, JSONException {
 
         //fetching stats for all players of the hometeam for this match
@@ -246,8 +245,10 @@ public class CompletedMatchStatsUIController {
                 }
             }
         }
-    filteredAllAwayPlayerStats.clear();
+
+        filteredAllAwayPlayerStats.clear();
     }
+
     public Player findPlayerById(ArrayList<Player> myPlayers,int id){
 
         for(int i=0;i<myPlayers.size();i++){
