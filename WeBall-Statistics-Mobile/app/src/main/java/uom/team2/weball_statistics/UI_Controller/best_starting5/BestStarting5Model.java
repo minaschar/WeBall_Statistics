@@ -45,27 +45,6 @@ public class BestStarting5Model {
 
     }
 
-    //----How to calculate Efficiency----
-    /* Effic – a measure of a player's efficiency, Effic = Pts + Rebs + Ast + Stl + Blk – (TO*4 + FG Misses + FT Misses)-Fouls*2 */
-
-    //Instead of individual stats I can have the Player as a Parameter and get those stats from the db with his id
-    public static int calculateEffic(PlayerLiveStatistics myStats){
-
-        int playerEffic = (myStats.getSuccessful_twopointer()*2)+(myStats.getSuccessful_threepointer()*3)+(myStats.getSuccessful_freethrow()*1)
-        +myStats.getRebound()+myStats.getAssist()+myStats.getSteal()+myStats.getBlock()-(myStats.getTurnover()*4)-(myStats.getFoul()*2)
-        -(myStats.getTotal_threepointer()+myStats.getTotal_twopointer()-myStats.getSuccessful_threepointer()-myStats.getSuccessful_twopointer())
-                -(myStats.getTotal_freethrow()-myStats.getSuccessful_freethrow());
-        return playerEffic;
-    }
-    public static int calculateTeamEffic(TeamLiveStatistics myStats){
-
-        int teamEffic = (myStats.getSuccessful_twopointer()*2)+(myStats.getSuccessful_threepointer()*3)+(myStats.getSuccessful_freethrow()*1)
-                +myStats.getRebound()+myStats.getAssist()+myStats.getSteal()+myStats.getBlock()-(myStats.getTurnover()*4)-(myStats.getFoul()*2)
-                -(myStats.getTotal_threepointer()+myStats.getTotal_twopointer()-myStats.getSuccessful_threepointer()-myStats.getSuccessful_twopointer())
-                -(myStats.getTotal_freethrow()-myStats.getSuccessful_freethrow());
-        return teamEffic;
-    }
-
     public void cleanData() {
         //Getting playerstatistics for all COMPLETED LATEST matches
         for (int i = 0; i < allPlayerLiveStatistics.size(); i++) {
@@ -95,7 +74,7 @@ public class BestStarting5Model {
             for (int i = 0; i < usefullData.size(); i++) {
 
                 if ((this.findPlayerById(usefullData.get(i).getPlayer_id()).getPosition()).equals("POINT_GUARD")) {
-                    int tempEffic = this.calculateEffic(usefullData.get(i));
+                    int tempEffic = usefullData.get(i).calculateEffic();
                     if (tempEffic >= maxEfficPG) {
                         maxEfficPG = tempEffic;
                         bestPG = this.findPlayerById(usefullData.get(i).getPlayer_id());
@@ -103,7 +82,7 @@ public class BestStarting5Model {
                     }
                 }
                 if ((this.findPlayerById(usefullData.get(i).getPlayer_id()).getPosition()).equals("SHOOTING_GUARD")) {
-                    int tempEffic = this.calculateEffic(usefullData.get(i));
+                    int tempEffic = usefullData.get(i).calculateEffic();
                     if (tempEffic >= maxEfficSG) {
                         maxEfficSG = tempEffic;
                         bestSG = this.findPlayerById(usefullData.get(i).getPlayer_id());
@@ -111,7 +90,7 @@ public class BestStarting5Model {
                     }
                 }
                 if ((this.findPlayerById(usefullData.get(i).getPlayer_id()).getPosition()).equals("SMALL_FORWARD")) {
-                    int tempEffic = this.calculateEffic(usefullData.get(i));
+                    int tempEffic = usefullData.get(i).calculateEffic();
                     if (tempEffic >= maxEfficSF) {
                         maxEfficSF = tempEffic;
                         bestSF = this.findPlayerById(usefullData.get(i).getPlayer_id());
@@ -119,7 +98,7 @@ public class BestStarting5Model {
                     }
                 }
                 if ((this.findPlayerById(usefullData.get(i).getPlayer_id()).getPosition()).equals("POWER_FORWARD")) {
-                    int tempEffic = this.calculateEffic(usefullData.get(i));
+                    int tempEffic = usefullData.get(i).calculateEffic();
                     if (tempEffic >= maxEfficPF) {
                         maxEfficPF = tempEffic;
                         bestPF = this.findPlayerById(usefullData.get(i).getPlayer_id());
@@ -127,7 +106,7 @@ public class BestStarting5Model {
                     }
                 }
                 if ((this.findPlayerById(usefullData.get(i).getPlayer_id()).getPosition()).equals("CENTER")) {
-                    int tempEffic = this.calculateEffic(usefullData.get(i));
+                    int tempEffic = usefullData.get(i).calculateEffic();
                     if (tempEffic >= maxEfficC) {
                         maxEfficC = tempEffic;
                         bestC = this.findPlayerById(usefullData.get(i).getPlayer_id());

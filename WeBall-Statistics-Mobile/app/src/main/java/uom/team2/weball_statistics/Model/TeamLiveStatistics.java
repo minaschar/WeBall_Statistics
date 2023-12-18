@@ -90,7 +90,17 @@ public class TeamLiveStatistics implements firebaseModel {
         result.put("rebound", rebound);
         result.put("foul", foul);
         result.put("turnover", turnover);
+
         return result;
+    }
+
+    public int calculateTeamEffic() {
+
+        int teamEffic = (this.successful_twopointer * 2) + (this.successful_threepointer * 3) + (this.successful_freethrow * 1)
+                + this.rebound + this.assist + this.steal + this.block - (this.turnover * 4) - (this.foul * 2)
+                - (this.total_threepointer + this.total_twopointer - this.successful_threepointer - this.successful_twopointer)
+                - (this.total_freethrow - this.successful_freethrow);
+        return teamEffic;
     }
 
     public int getMatch_id() {
