@@ -11,6 +11,8 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -129,117 +131,82 @@ public class CompletedMatchStatsUIController {
 
     public void getPlayerLiveStatsForBoth(Match myMatch) throws IOException, JSONException {
 
-        //fetching stats for all players of the hometeam for this match
-        OkHttpClient client = new OkHttpClient().newBuilder()
-                .build();
-        MediaType mediaType = MediaType.parse("application/json");
-        Request request = new Request.Builder()
-                .url(Config.API_URL + "playerLiveStatistics.php?match_id=" + myMatch.getId())
-                .method("GET", null)
-                .addHeader("Content-Type", "application/json")
-                .build();
-        Response response = client.newCall(request).execute();
-        ArrayList<PlayerLiveStatistics> unfilteredAllHomePlayerStats = JSONHandler.deserializeListOfPlayerLiveStatistics(response.body().string());
-        for (int i = 0; i < unfilteredAllHomePlayerStats.size(); i++) {
-            if (this.isInTeam(homeTeamPlayers, unfilteredAllHomePlayerStats.get(i).getPlayer_id())) {
-                filteredAllHomePlayerStats.add(unfilteredAllHomePlayerStats.get(i));
-            }
-        }
+        ArrayList<PlayerLiveStatistics> unfilteredAllPlayerStats = this.fetchAllPlayerStats(myMatch);
 
-        //fetching stats for all players of the away team for this match
-        OkHttpClient client2 = new OkHttpClient().newBuilder()
-                .build();
-        MediaType mediaType2 = MediaType.parse("application/json");
-        Request request2 = new Request.Builder()
-                .url(Config.API_URL + "playerLiveStatistics.php?match_id=" + myMatch.getId())
-                .method("GET", null)
-                .addHeader("Content-Type", "application/json")
-                .build();
-        Response response2 = client2.newCall(request2).execute();
-        ArrayList<PlayerLiveStatistics> unfilteredAllAwayPlayerStats = JSONHandler.deserializeListOfPlayerLiveStatistics(response2.body().string());
-        for (int i = 0; i < unfilteredAllAwayPlayerStats.size(); i++) {
-            if (this.isInTeam(awayTeamPlayers, unfilteredAllAwayPlayerStats.get(i).getPlayer_id())) {
-                filteredAllAwayPlayerStats.add(unfilteredAllAwayPlayerStats.get(i));
-            }
-        }
+        this.filteredAllHomePlayerStats = filterPlayerStats(homeTeamPlayers, unfilteredAllPlayerStats);
+        this.filteredAllAwayPlayerStats = filterPlayerStats(awayTeamPlayers, unfilteredAllPlayerStats);
+
+        this.findTop5(this.homeTeamPlayers, this.filteredAllHomePlayerStats, true);
+        this.findTop5(this.awayTeamPlayers, this.filteredAllAwayPlayerStats, false);
 
 
-        //HOME TEAM
-        int maxPGH = -100;
-        int maxSGH = -100;
-        int maxSFH = -100;
-        int maxPFH = -100;
-        int maxCH = -100;
-
-        //Sorting stats to the best 5 for the home team
-        for (int i = 0; i < filteredAllHomePlayerStats.size(); i++) {
-            if (findPlayerById(homeTeamPlayers, filteredAllHomePlayerStats.get(i).getPlayer_id()).getPosition().equals("POINT_GUARD")) {
-                if (filteredAllHomePlayerStats.get(i).calculateEffic() > maxPGH) {
-                    maxPGH = filteredAllHomePlayerStats.get(i).calculateEffic();
-                    bestPgH = filteredAllHomePlayerStats.get(i);
-                }
-            } else if (findPlayerById(homeTeamPlayers, filteredAllHomePlayerStats.get(i).getPlayer_id()).getPosition().equals("SHOOTING_GUARD")) {
-                if (filteredAllHomePlayerStats.get(i).calculateEffic() > maxSGH) {
-                    maxSGH = filteredAllHomePlayerStats.get(i).calculateEffic();
-                    bestSgH = filteredAllHomePlayerStats.get(i);
-                }
-            } else if (findPlayerById(homeTeamPlayers, filteredAllHomePlayerStats.get(i).getPlayer_id()).getPosition().equals("SMALL_FORWARD")) {
-                if (filteredAllHomePlayerStats.get(i).calculateEffic() > maxSFH) {
-                    maxSFH = filteredAllHomePlayerStats.get(i).calculateEffic();
-                    bestSfH = filteredAllHomePlayerStats.get(i);
-                }
-            } else if (findPlayerById(homeTeamPlayers, filteredAllHomePlayerStats.get(i).getPlayer_id()).getPosition().equals("POWER_FORWARD")) {
-                if (filteredAllHomePlayerStats.get(i).calculateEffic() > maxPFH) {
-                    maxPFH = filteredAllHomePlayerStats.get(i).calculateEffic();
-                    bestPfH = filteredAllHomePlayerStats.get(i);
-                }
-            } else if (findPlayerById(homeTeamPlayers, filteredAllHomePlayerStats.get(i).getPlayer_id()).getPosition().equals("CENTER")) {
-                if (filteredAllHomePlayerStats.get(i).calculateEffic() > maxCH) {
-                    maxCH = filteredAllHomePlayerStats.get(i).calculateEffic();
-                    bestCH = filteredAllHomePlayerStats.get(i);
-                }
-            }
-
-        }
         filteredAllHomePlayerStats.clear();
-        //AWAY TEAM
-        int maxPGA = -100;
-        int maxSGA = -100;
-        int maxSFA = -100;
-        int maxPFA = -100;
-        int maxCA = -100;
+        filteredAllAwayPlayerStats.clear();
+    }
 
-        //Sorting stats to the best 5 for the away team
-        for (int i = 0; i < filteredAllAwayPlayerStats.size(); i++) {
-            if (findPlayerById(awayTeamPlayers, filteredAllAwayPlayerStats.get(i).getPlayer_id()).getPosition().equals("POINT_GUARD")) {
-                if (filteredAllAwayPlayerStats.get(i).calculateEffic() > maxPGA) {
-                    maxPGA = filteredAllAwayPlayerStats.get(i).calculateEffic();
-                    bestPgA = filteredAllAwayPlayerStats.get(i);
-                }
-            } else if (findPlayerById(awayTeamPlayers, filteredAllAwayPlayerStats.get(i).getPlayer_id()).getPosition().equals("SHOOTING_GUARD")) {
-                if (filteredAllAwayPlayerStats.get(i).calculateEffic() > maxSGA) {
-                    maxSGA = filteredAllAwayPlayerStats.get(i).calculateEffic();
-                    bestSgA = filteredAllAwayPlayerStats.get(i);
-                }
-            } else if (findPlayerById(awayTeamPlayers, filteredAllAwayPlayerStats.get(i).getPlayer_id()).getPosition().equals("SMALL_FORWARD")) {
-                if (filteredAllAwayPlayerStats.get(i).calculateEffic() > maxSFA) {
-                    maxSFA = filteredAllAwayPlayerStats.get(i).calculateEffic();
-                    bestSfA = filteredAllAwayPlayerStats.get(i);
-                }
-            } else if (findPlayerById(awayTeamPlayers, filteredAllAwayPlayerStats.get(i).getPlayer_id()).getPosition().equals("POWER_FORWARD")) {
-                if (filteredAllAwayPlayerStats.get(i).calculateEffic() > maxPFA) {
-                    maxPFA = filteredAllAwayPlayerStats.get(i).calculateEffic();
-                    bestPfA = filteredAllAwayPlayerStats.get(i);
-                }
-            } else if (findPlayerById(awayTeamPlayers, filteredAllAwayPlayerStats.get(i).getPlayer_id()).getPosition().equals("CENTER")) {
-                if (filteredAllAwayPlayerStats.get(i).calculateEffic() > maxCA) {
-                    maxCA = filteredAllAwayPlayerStats.get(i).calculateEffic();
-                    bestCA = filteredAllAwayPlayerStats.get(i);
-                }
+    private ArrayList<PlayerLiveStatistics> fetchAllPlayerStats(Match myMatch) throws IOException, JSONException {
+        OkHttpClient client = new OkHttpClient().newBuilder().build();
+
+        String apiUrl = Config.API_URL + "playerLiveStatistics.php?match_id=" + myMatch.getId();
+        Request request = new Request.Builder()
+                .url(apiUrl)
+                .method("GET", null)
+                .addHeader("Content-Type", "application/json")
+                .build();
+
+        Response response = client.newCall(request).execute();
+        ArrayList<PlayerLiveStatistics> unfilteredAllPlayerStats = JSONHandler.deserializeListOfPlayerLiveStatistics(response.body().string());
+
+        return unfilteredAllPlayerStats;
+    }
+
+    private ArrayList<PlayerLiveStatistics> filterPlayerStats(ArrayList<Player> teamPlayers, ArrayList<PlayerLiveStatistics> unfilteredAllPlayerStats) {
+        ArrayList<PlayerLiveStatistics> filteredStats = new ArrayList<>();
+
+        for (PlayerLiveStatistics playerStats : unfilteredAllPlayerStats) {
+            if (isInTeam(teamPlayers, playerStats.getPlayer_id())) {
+                filteredStats.add(playerStats);
             }
         }
 
-        filteredAllAwayPlayerStats.clear();
+        return filteredStats;
+    }
+
+    private void findTop5(ArrayList<Player> teamPlayers, ArrayList<PlayerLiveStatistics> filteredAllPlayerStats, boolean isHomeTeam) {
+        Map<String, Integer> maxValues = new HashMap<>();
+        Map<String, PlayerLiveStatistics> bestPlayers = new HashMap<>();
+
+        // Define positions
+        String[] positions = {"POINT_GUARD", "SHOOTING_GUARD", "SMALL_FORWARD", "POWER_FORWARD", "CENTER"};
+
+        // Initialize max values
+        for (String position : positions) {
+            maxValues.put(position, -100);
+        }
+
+        // Sorting stats to the best 5
+        for (PlayerLiveStatistics stats : filteredAllPlayerStats) {
+            String position = findPlayerById(teamPlayers, stats.getPlayer_id()).getPosition();
+
+            if (stats.calculateEffic() > maxValues.get(position)) {
+                maxValues.put(position, stats.calculateEffic());
+                bestPlayers.put(position, stats);
+            }
+        }
+
+        if (isHomeTeam) {
+            this.bestPgH = bestPlayers.get("POINT_GUARD");
+            this.bestSgH = bestPlayers.get("SHOOTING_GUARD");
+            this.bestSfH = bestPlayers.get("SMALL_FORWARD");
+            this.bestPfH = bestPlayers.get("POWER_FORWARD");
+            this.bestCH = bestPlayers.get("CENTER");
+        } else {
+            this.bestPgA = bestPlayers.get("POINT_GUARD");
+            this.bestSgA = bestPlayers.get("SHOOTING_GUARD");
+            this.bestSfA = bestPlayers.get("SMALL_FORWARD");
+            this.bestPfA = bestPlayers.get("POWER_FORWARD");
+            this.bestCA = bestPlayers.get("CENTER");
+        }
     }
 
     public Player findPlayerById(ArrayList<Player> myPlayers, int id) {
